@@ -4,7 +4,7 @@
 
 This Script converts Gem5 simulation statistics to McPAT compatible input files. It supports multiple cores as well as multiple private or one shared L2 cache
 
-
+# TODO: Muitilple cores not tested!
 
 ### Usage
 
@@ -13,7 +13,7 @@ Parser requires [python 2.7](https://www.python.org/download/releases/2.7/) to r
 
 
 ```sh
- usage: Gem5ToMcPAT-Parser.py [-h] --config PATH --stats PATH --template PATH
+ usage: Gem5McPATParser.py [-h] --config PATH --stats PATH --template PATH
                                     [--output PATH]
 
         Gem5 to McPAT parser
@@ -34,7 +34,7 @@ Parser requires [python 2.7](https://www.python.org/download/releases/2.7/) to r
 ### Example
 
 ```sh
-$ python Gem5ToMcPAT-Parser.py -c config.json -s stats.txt -t template.xml
+$ python Gem5McPATParser.py -c config.json -s stats.txt -t template.xml
 ```
 ### Credits
 
