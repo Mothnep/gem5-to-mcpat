@@ -5,9 +5,9 @@
     <param name="number_of_cores" value="1"/>
     <param name="number_of_L1Directories" value="0"/>
     <param name="number_of_L2Directories" value="0"/>
-    <param name="number_of_L2s" value="1"/>
+    <param name="number_of_L2s" value="0"/>
     <!-- This number means how many L2 clusters in each cluster there can be multiple banks/ports -->
-    <param name="Private_L2" value="1"/>
+    <!-- <param name="Private_L2" value="0"/> -->
     <!--1 Private, 0 shared/coherent -->
     <param name="number_of_L3s" value="0"/>
     <!-- This number means how many L3 clusters -->
@@ -28,17 +28,19 @@
     <param name="temperature" value="380"/>
     <!-- Kelvin -->
     <param name="number_cache_levels" value="1"/>
-    <param name="interconnect_projection_type" value="0"/>
+    <param name="interconnect_projection_type" value="1"/>
     <!--0: aggressive wire technology; 1: conservative wire technology -->
-    <param name="device_type" value="0"/>
+    <param name="device_type" value="2"/>
     <!--0: HP(High Performance Type); 1: LSTP(Low standby power) 2: LOP (Low Operating Power)  -->
-    <param name="longer_channel_device" value="0"/>
+    <param name="longer_channel_device" value="1"/>
+	<param name="Embedded" value="1"/><!-- Embedded processor like ARM or general purpose processors?  -->
     <!-- 0 no use; 1 use when possible -->
     <param name="power_gating" value="1"/>
     <!-- 0 not enabled; 1 enabled -->
-    <param name="machine_bits" value="64"/>
-    <param name="virtual_address_width" value="64"/>
-    <param name="physical_address_width" value="52"/>
+    <param name="opt_clockrate" value="1"/>
+    <param name="machine_bits" value="32"/>
+    <param name="virtual_address_width" value="32"/>
+    <param name="physical_address_width" value="32"/>
     <param name="virtual_memory_page_size" value="4096"/>
     <!-- address width determines the tag_width in Cache, LSQ and buffers in cache controller 
       default value is machine_bits, if not set -->
@@ -51,15 +53,15 @@
     <component id="system.core" name="core">
       <!-- Core property -->
       <param name="clock_rate" value="1e-6/config.system.cpu_clk_domain.clock.0*1e12"/>
-      <param name="vdd" value="1.25"/>
+      <!-- <param name="vdd" value="1.25"/> -->
       <!-- 0 means using ITRS default vdd -->
       <param name="power_gating_vcc" value="-1"/>
       <!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
       <param name="opt_local" value="0"/>
       <!-- for cores with unknown timing, set to 0 to force off the opt flag -->
       <param name="instruction_length" value="32"/>
-      <param name="opcode_width" value="16"/>
-      <param name="x86" value="1"/>
+      <param name="opcode_width" value="7"/>
+      <param name="x86" value="0"/>
       <param name="micro_opcode_width" value="8"/>
       <param name="machine_type" value="0"/>
       <!-- inorder/OoO; 1 inorder; 0 OOO-->
@@ -79,14 +81,14 @@
       as in the complexity effective processors paper; issue_width==dispatch_width -->
       <param name="commit_width" value="config.system.cpu.commitWidth"/>
       <!-- commit_width determines the number of ports of register files -->
-      <param name="fp_issue_width" value="2"/>
+      <param name="fp_issue_width" value="1"/>
       <param name="prediction_width" value="1"/>
       <!-- number of branch instructions can be predicted simultaneously-->
       <!-- Current version of McPAT does not distinguish int and floating point pipelines 
       Theses parameters are reserved for future use.-->
       <param name="pipelines_per_core" value="1,1"/>
       <!--integer_pipeline and floating_pipelines, if the floating_pipelines is 0, then the pipeline is shared-->
-      <param name="pipeline_depth" value="31,31"/>
+      <param name="pipeline_depth" value="8,8"/>
       <!-- pipeline depth of int and fp, if pipeline is shared, the second number is the average cycles of fp ops -->
       <!-- issue and exe unit-->
       <param name="ALU_per_core" value="6"/>
@@ -122,6 +124,7 @@
       CAM-based scheme have the valid bit in the data field of the CAM 
       both RAM and CAM need RAM-based checkpoint table, checkpoint_depth=# of in_flight instructions;
       Detailed RAT Implementation see TR -->
+      <param name="checkpoint_depth" value="1"/>  
       <param name="register_windows_size" value="0"/>
       <!-- how many windows in the windowed register file, sun processors;
       no register windowing is used when this number is 0 -->
@@ -132,7 +135,7 @@
       <!-- By default, in-order cores do not have load buffers -->
       <param name="load_buffer_size" value="config.system.cpu.LQEntries"/>
       <!-- number of ports refer to sustain-able concurrent memory accesses -->
-      <param name="memory_ports" value="2"/>
+      <param name="memory_ports" value="1"/>
       <!-- max_allowed_in_flight_memo_instructions determines the # of ports of load and store buffer
       as well as the ports of Dcache which is connected to LSU -->
       <!-- dual-pumped Dcache can be used to save the extra read/write ports -->
@@ -206,32 +209,33 @@
       The same rule applies to all cache access stats too!  -->
       <!-- following is AF for max power computation. 
         Do not change them, unless you understand them-->
-      <stat name="IFU_duty_cycle" value="0.25"/>
-      <!--depends on Icache line size and instruction issue rate -->
-      <stat name="LSU_duty_cycle" value="0.25"/>
-      <stat name="MemManU_I_duty_cycle" value="0.25"/>
-      <stat name="MemManU_D_duty_cycle" value="0.25"/>
-      <stat name="ALU_duty_cycle" value="1"/>
-      <stat name="MUL_duty_cycle" value="0.3"/>
-      <stat name="FPU_duty_cycle" value="0.3"/>
-      <stat name="ALU_cdb_duty_cycle" value="1"/>
-      <stat name="MUL_cdb_duty_cycle" value="0.3"/>
-      <stat name="FPU_cdb_duty_cycle" value="0.3"/>
-      <param name="number_of_BPT" value="2"/>
-      <component id="system.core.predictor" name="PBT">
-        <!-- branch predictor; tournament predictor see Alpha implementation -->
-        <param name="local_predictor_size" value="10,3"/>
-        <param name="local_predictor_entries" value="1024"/>
-        <param name="global_predictor_entries" value="4096"/>
-        <param name="global_predictor_bits" value="2"/>
-        <param name="chooser_predictor_entries" value="4096"/>
-        <param name="chooser_predictor_bits" value="2"/>
-        <!-- These parameters can be combined like below in next version
-        <param name="load_predictor" value="10,3,1024"/>
-        <param name="global_predictor" value="4096,2"/>
-        <param name="predictor_chooser" value="4096,2"/>
-        -->
-      </component>
+        <stat name="IFU_duty_cycle" value="0.9"/>
+        <stat name="BR_duty_cycle" value="0.72"/><!--branch-->			
+        <stat name="LSU_duty_cycle" value="0.71"/>
+        <stat name="MemManU_I_duty_cycle" value="0.9"/>
+        <stat name="MemManU_D_duty_cycle" value="0.71"/>
+        <stat name="ALU_duty_cycle" value="0.76"/>
+        <!-- (.78*2+.71)/3 -->
+        <stat name="MUL_duty_cycle" value="0.82"/>
+        <stat name="FPU_duty_cycle" value="0.0"/>
+        <stat name="ALU_cdb_duty_cycle" value="0.76"/>
+        <stat name="MUL_cdb_duty_cycle" value="0.82"/>
+        <stat name="FPU_cdb_duty_cycle" value="0.0"/>
+        <param name="number_of_BPT" value="2"/>
+        <component id="system.core0.predictor" name="PBT">
+            <!-- branch predictor; tournament predictor see Alpha implementation -->
+            <param name="local_predictor_size" value="10,3"/>
+            <param name="local_predictor_entries" value="4"/>
+            <param name="global_predictor_entries" value="4096"/>
+            <param name="global_predictor_bits" value="2"/>
+            <param name="chooser_predictor_entries" value="4096"/>
+            <param name="chooser_predictor_bits" value="2"/>
+            <!-- These parameters can be combined like below in next version
+            <param name="load_predictor" value="10,3,1024"/>
+            <param name="global_predictor" value="4096,2"/>
+            <param name="predictor_chooser" value="4096,2"/>
+            -->
+        </component>
       <component id="system.core.itlb" name="itlb">
         <param name="number_entries" value="config.system.cpu.itb.size"/>
         <stat name="total_accesses" value="stats.system.cpu.itb_walker_cache.tags.tag_accesses"/>
@@ -282,27 +286,27 @@
       </component>
     </component>
     
-    <component id="system.L2" name="L2">
+    <!-- <component id="system.L2" name="L2"> -->
       <!-- all the buffer related are optional -->
-      <param name="L2_config" value="config.system.l2.size,config.system.l2.tags.block_size,config.system.l2.assoc,1,1,config.system.l2.data_latency,config.system.l2.tags.block_size,1"/>
+      <!-- <param name="L2_config" value="config.system.l2.size,config.system.l2.tags.block_size,config.system.l2.assoc,1,1,config.system.l2.data_latency,config.system.l2.tags.block_size,1"/> -->
       <!-- the parameters are capacity,block_width, associativity, bank, throughput w.r.t. core clock, latency w.r.t. core clock,output_width, cache policy -->
-      <param name="buffer_sizes" value="config.system.l2.mshrs,config.system.l2.mshrs,config.system.l2.mshrs,config.system.l2.mshrs"/>
+      <!-- <param name="buffer_sizes" value="config.system.l2.mshrs,config.system.l2.mshrs,config.system.l2.mshrs,config.system.l2.mshrs"/> -->
       <!-- cache controller buffer sizes: miss_buffer_size(MSHR),fill_buffer_size,prefetch_buffer_size,wb_buffer_size-->
-      <param name="clockrate" value="1e-6/( config.system.clk_domain.clock.0 * 1e-12)"/>
-      <param name="vdd" value="0"/>
+      <!-- <param name="clockrate" value="1e-6/( config.system.clk_domain.clock.0 * 1e-12)"/> -->
+      <!-- <param name="vdd" value="0"/> -->
       <!-- 0 means using ITRS default vdd -->
-      <param name="power_gating_vcc" value="-1"/>
+      <!-- <param name="power_gating_vcc" value="-1"/> -->
       <!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
-      <param name="ports" value="1,1,1"/>
+      <!-- <param name="ports" value="1,1,1"/> -->
       <!-- number of r, w, and rw ports -->
-      <param name="device_type" value="0"/>
-      <stat name="read_accesses" value="stats.system.l2.ReadExReq_accesses::total"/>
-      <stat name="write_accesses" value="(stats.system.l2.overall_accesses::total + stats.system.l2.writebacks::total)"/>
-      <stat name="read_misses" value="stats.system.l2.ReadExReq_misses::total"/>
-      <stat name="write_misses" value="(stats.system.l2.overall_misses::total - stats.system.l2.ReadExReq_misses::total)"/>
-      <stat name="conflicts" value="stats.system.l2.replacements"/> 
-      <stat name="duty_cycle" value="0.5"/>
-    </component>
+      <!-- <param name="device_type" value="0"/> -->
+      <!-- <stat name="read_accesses" value="stats.system.l2.ReadExReq_accesses::total"/> -->
+      <!-- <stat name="write_accesses" value="(stats.system.l2.overall_accesses::total + stats.system.l2.writebacks::total)"/> -->
+      <!-- <stat name="read_misses" value="stats.system.l2.ReadExReq_misses::total"/> -->
+      <!-- <stat name="write_misses" value="(stats.system.l2.overall_misses::total - stats.system.l2.ReadExReq_misses::total)"/> -->
+      <!-- <stat name="conflicts" value="stats.system.l2.replacements"/>  -->
+      <!-- <stat name="duty_cycle" value="0.5"/> -->
+    <!-- </component> -->
 
 
 
