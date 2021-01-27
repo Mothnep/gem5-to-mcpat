@@ -1,10 +1,12 @@
 # Gem5 to McPAT parser with multicore support
 
-
-
 This Script converts Gem5 simulation statistics to McPAT compatible input files. It supports multiple cores as well as multiple private or one shared L2 cache
 
-# TODO: Muitilple cores not tested!
+### Last tested on Gem5 version: 
+commit 0d703041fcd5d119012b62287695723a2955b408 (HEAD -> stable, tag: v20.1.0.2, origin/stable, origin/master, origin/hotfix-memorysize-division, origin/HEAD)
+
+
+## TODO: Muitilple cores not tested!
 
 ### Usage
 

@@ -383,7 +383,7 @@
       <!-- current McPAT only supports homogeneous memory controllers -->
       <param name="memory_channels_per_mc" value="2"/>
       <param name="number_ranks" value="2"/>
-      <param name="withPHY" value="config.system.mem_ctrls.0.ranks_per_channel"/>
+      <param name="withPHY" value="config.system.mem_ctrls.0.dram.ranks_per_channel"/> 
       <!-- # of ranks of each channel-->
       <param name="req_window_size_per_channel" value="32"/>
       <param name="IO_buffer_size_per_channel" value="32"/>
