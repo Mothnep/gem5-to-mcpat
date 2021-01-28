@@ -2,7 +2,7 @@
 
 This Script converts Gem5 simulation statistics to McPAT compatible input files. It supports multiple cores as well as multiple private or one shared L2 cache
 
-### Gem5 Supported Version:
+### Gem5 Supported Version
 
 Last tested on Gem5 version (tag: v20.1.0.2) stable. You can fetch this version using:
 
@@ -17,7 +17,7 @@ cd gem5
 git checkout 0d703041fcd5d119012b62287695723a2955b408
 ```
 
-### McPat Supported Version:
+### McPat Supported Version
 
 This script was tested with McPat v1.3.0. This can be attained from 
 
