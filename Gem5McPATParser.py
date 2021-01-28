@@ -1,6 +1,11 @@
 """
 [usage]:
-python Gem5ToMcPAT-Parser.py -c ../m5out/config.json -s ../m5out/stats.txt -t template.xml
+python3 Gem5ToMcPAT-Parser.py -c ../m5out/config.json -s ../m5out/stats.txt -t template.xml
+
+# Tested
+python 3.6.9
+python 3.8.5
+
 """
 import argparse
 import sys
