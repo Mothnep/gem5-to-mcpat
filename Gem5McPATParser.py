@@ -10,6 +10,7 @@ from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import copy
 import types
+import logging
 
 
 def prettify(elem):
@@ -45,31 +46,33 @@ def create_parser():
     return parser
 
 
-class PIParser(ET.XMLTreeBuilder):
-    def __init__(self):
-        ET.XMLTreeBuilder.__init__(self)
-        # assumes ElementTree 1.2.X
-        self._parser.CommentHandler = self.handle_comment
-        self._parser.ProcessingInstructionHandler = self.handle_pi
-        self._target.start("document", {})
+class PIParser(ET.TreeBuilder):
+    def __init__(self, *args, **kwargs):
+        # call init of superclass and pass args and kwargs
+        super(PIParser, self).__init__(*args, **kwargs)
+
+        self.CommentHandler = self.comment
+        self.ProcessingInstructionHandler = self.pi
+        self.start("document", {})
 
     def close(self):
-        self._target.end("document")
-        return ET.XMLTreeBuilder.close(self)
+        self.end("document")
+        return ET.TreeBuilder.close(self)
 
-    def handle_comment(self, data):
-        self._target.start(ET.Comment, {})
-        self._target.data(data)
-        self._target.end(ET.Comment)
+    def comment(self, data):
+        self.start(ET.Comment, {})
+        self.data(data)
+        self.end(ET.Comment)
 
-    def handle_pi(self, target, data):
-        self._target.start(ET.PI, {})
-        self._target.data(target + " " + data)
-        self._target.end(ET.PI)
+    def pi(self, target, data):
+        self.start(ET.PI, {})
+        self.data(target + " " + data)
+        self.end(ET.PI)
 
 
 def parse(source):
-    return ET.parse(source, PIParser())
+    parser = ET.XMLParser(target=PIParser())
+    return ET.parse(source, parser=parser)
 
 
 def readStatsFile(statsFile):
@@ -87,7 +90,7 @@ def readStatsFile(statsFile):
             statKind = statLine.match(line).group(1)
             statValue = statLine.match(line).group(2)
             if statValue == 'nan':
-                print "\tWarning (stats): %s is nan. Setting it to 0" % statKind
+                logging.warning("%s is nan. Setting it to 0" % statKind)
                 statValue = '0'
             stats[statKind] = statValue
     F.close()
@@ -111,8 +114,8 @@ def readMcpatFile(templateFile):
 
 def prepareTemplate(outputFile):
     numCores = len(config["system"]["cpu"])
-    privateL2 = config["system"]["cpu"][0].has_key('l2cache')
-    sharedL2 = config["system"].has_key('l2')
+    privateL2 = 'l2cache' in config["system"]["cpu"][0].keys()
+    sharedL2 = 'l2' in config["system"].keys()
 
     if privateL2:
         numL2 = numCores
@@ -138,7 +141,7 @@ def prepareTemplate(outputFile):
         temp = child.attrib.get('value')
 
         # to consider all the cpus in total cycle calculation
-        if isinstance(temp, basestring) and "cpu." in temp and temp.split('.')[0] == "stats":
+        if isinstance(temp, str) and "cpu." in temp and temp.split('.')[0] == "stats":
             value = "(" + temp.replace("cpu.", "cpu0.") + ")"
             for i in range(1, numCores):
                 value = value + \
@@ -156,33 +159,33 @@ def prepareTemplate(outputFile):
                     childId = coreChild.attrib.get("id")
                     childValue = coreChild.attrib.get("value")
                     childName = coreChild.attrib.get("name")
-                    if isinstance(childName, basestring) and childName == "x86":
+                    if isinstance(childName, str) and childName == "x86":
                         if config["system"]["cpu"][coreCounter]["isa"][0]["type"] == "X86ISA":
                             childValue = "1"
                         else:
                             childValue = "0"
-                    if isinstance(childId, basestring) and "core" in childId:
+                    if isinstance(childId, str) and "core" in childId:
                         childId = childId.replace(
                             "core", "core" + str(coreCounter))
-                    if isinstance(childValue, basestring) and "cpu." in childValue and "stats" in childValue.split('.')[0]:
+                    if isinstance(childValue, str) and "cpu." in childValue and "stats" in childValue.split('.')[0]:
                         childValue = childValue.replace(
                             "cpu.", "cpu" + str(coreCounter) + ".")
-                    if isinstance(childValue, basestring) and "cpu." in childValue and "config" in childValue.split('.')[0]:
+                    if isinstance(childValue, str) and "cpu." in childValue and "config" in childValue.split('.')[0]:
                         childValue = childValue.replace(
                             "cpu.", "cpu." + str(coreCounter) + ".")
-                    if len(list(coreChild)) is not 0:
+                    if len(list(coreChild)) != 0:
                         for level2Child in coreChild:
                             level2ChildValue = level2Child.attrib.get("value")
-                            if isinstance(level2ChildValue, basestring) and "cpu." in level2ChildValue and "stats" in level2ChildValue.split('.')[0]:
+                            if isinstance(level2ChildValue, str) and "cpu." in level2ChildValue and "stats" in level2ChildValue.split('.')[0]:
                                 level2ChildValue = level2ChildValue.replace(
                                     "cpu.", "cpu" + str(coreCounter) + ".")
-                            if isinstance(level2ChildValue, basestring) and "cpu." in level2ChildValue and "config" in level2ChildValue.split('.')[0]:
+                            if isinstance(level2ChildValue, str) and "cpu." in level2ChildValue and "config" in level2ChildValue.split('.')[0]:
                                 level2ChildValue = level2ChildValue.replace(
                                     "cpu.", "cpu." + str(coreCounter) + ".")
                             level2Child.attrib["value"] = level2ChildValue
-                    if isinstance(childId, basestring):
+                    if isinstance(childId, str):
                         coreChild.attrib["id"] = childId
-                    if isinstance(childValue, basestring):
+                    if isinstance(childValue, str):
                         coreChild.attrib["value"] = childValue
                 root[0][0].insert(elemCounter, coreElem)
                 coreElem = copy.deepcopy(coreElemCopy)
@@ -209,13 +212,13 @@ def prepareTemplate(outputFile):
                     l2Elem.attrib["id"] = "system.L2" + str(l2Counter)
                     for l2Child in l2Elem:
                         childValue = l2Child.attrib.get("value")
-                        if isinstance(childValue, basestring) and "cpu." in childValue and "stats" in childValue.split('.')[0]:
+                        if isinstance(childValue, str) and "cpu." in childValue and "stats" in childValue.split('.')[0]:
                             childValue = childValue.replace(
                                 "cpu.", "cpu" + str(l2Counter) + ".")
-                        if isinstance(childValue, basestring) and "cpu." in childValue and "config" in childValue.split('.')[0]:
+                        if isinstance(childValue, str) and "cpu." in childValue and "config" in childValue.split('.')[0]:
                             childValue = childValue.replace(
                                 "cpu.", "cpu." + str(l2Counter) + ".")
-                        if isinstance(childValue, basestring):
+                        if isinstance(childValue, str):
                             l2Child.attrib["value"] = childValue
                     root[0][0].insert(elemCounter, l2Elem)
                     l2Elem = copy.deepcopy(l2ElemCopy)
@@ -226,7 +229,7 @@ def prepareTemplate(outputFile):
                 child.attrib["id"] = "system.L20"
                 for l2Child in child:
                     childValue = l2Child.attrib.get("value")
-                    if isinstance(childValue, basestring) and "cpu.l2cache." in childValue:
+                    if isinstance(childValue, str) and "cpu.l2cache." in childValue:
                         childValue = childValue.replace("cpu.l2cache.", "l2.")
 
     prettify(root)
@@ -256,14 +259,16 @@ def getConfValue(confStr):
             currConf = currConf[x]
         currHierarchy += "."
 
-    print(confStr, currConf)
+    logging.info(confStr, currConf)
 
     return currConf
+
 
 def dumpMcpatOut(outFile):
     """
     outfile: file reference to "mcpat-in.xml"
     """
+
     rootElem = templateMcpat.getroot()
     configMatch = re.compile(r'config\.([][a-zA-Z0-9_:\.]+)')
     # replace params with values from the GEM5 config file
@@ -272,20 +277,24 @@ def dumpMcpatOut(outFile):
         name = param.attrib['name']
         value = param.attrib['value']
 
-
         # if there is a config in this attrib
         if 'config' in value:
             allConfs = configMatch.findall(value)
-            
+
             for conf in allConfs:
-                
+
                 confValue = getConfValue(conf)
                 value = re.sub("config." + conf, str(confValue), value)
 
             if "," in value:
                 exprs = re.split(',', value)
                 for i in range(len(exprs)):
-                    exprs[i] = str(eval(exprs[i]))
+                    try:
+                        exprs[i] = str(eval(exprs[i]))
+                    except Exception as e:
+                        logging.error("Possibly " + conf + " does not exist in config" +
+                                      "\n\t set correct key string in template value")
+                        raise
 
                 param.attrib['value'] = ','.join(exprs)
             else:
@@ -300,7 +309,7 @@ def dumpMcpatOut(outFile):
             allStats = statRe.findall(value)
             expr = value
             for i in range(len(allStats)):
-                print(allStats[i])
+                # print(allStats[i])
                 if allStats[i] in stats:
 
                     expr = re.sub('stats.%s' %
@@ -309,20 +318,22 @@ def dumpMcpatOut(outFile):
                     try:
                         cpu_stat = allStats[i].replace(".cpu0.", ".cpu.")
                         expr = re.sub('stats.%s' %
-                                    allStats[i], stats[cpu_stat], expr)
+                                      allStats[i], stats[cpu_stat], expr)
                     except KeyError:
-                        print "***WARNING: %s does not exist in stats***" % allStats[i]
-                        print "\t Please use the right stats in your McPAT template file"     
+                        logging.warning(allStats[i] +
+                                        " does not exist in stats" +
+                                        "\n\t Maybe invalid stat in McPAT template file")
                 else:
                     # expr = re.sub('stats.%s' % allStats[i], str(1), expr)
-                    print "***WARNING: %s does not exist in stats***" % allStats[i]
-                    print "\t Please use the right stats in your McPAT template file"
-                    pass
+                    logging.warning(allStats[i] +
+                                    " does not exist in stats" +
+                                    "\n\t Maybe invalid stat in McPAT template file")
 
             if 'config' not in expr and 'stats' not in expr:
                 stat.attrib['value'] = str(eval(expr))
+
     # Write out the xml file
-    templateMcpat.write(outFile)
+    templateMcpat.write(outFile.name)
 
 
 def main():
@@ -332,7 +343,7 @@ def main():
     readStatsFile(args.stats)
     readConfigFile(args.config)
     readMcpatFile(args.template)
-    
+
     prepareTemplate(args.output)
 
     dumpMcpatOut(args.output)
