@@ -2,17 +2,25 @@
 
 This Script converts Gem5 simulation statistics to McPAT compatible input files. It supports multiple cores as well as multiple private or one shared L2 cache
 
-### Last tested on Gem5 version: 
-commit 0d703041fcd5d119012b62287695723a2955b408 (HEAD -> stable, tag: v20.1.0.2, origin/stable, origin/master, origin/hotfix-memorysize-division, origin/HEAD)
+### Gem5 Supported Version:
 
+Last tested on Gem5 version (tag: v20.1.0.2) stable. You can fetch this version using:
 
-## TODO: Muitilple cores not tested!
+```sh
+# assuming you have git installed
+git clone clone https://gem5.googlesource.com/public/gem5
+
+# go into cloned gem5 repo
+cd gem5
+
+# checkout supported commit using hash
+git checkout 0d703041fcd5d119012b62287695723a2955b408
+```
+
 
 ### Usage
 
-Parser requires [python 2.7](https://www.python.org/download/releases/2.7/) to run.
-
-
+Parser requires [python 3.6](https://www.python.org/download/releases/3.6/) to run.
 
 ```sh
  usage: Gem5McPATParser.py [-h] --config PATH --stats PATH --template PATH
@@ -36,24 +44,10 @@ Parser requires [python 2.7](https://www.python.org/download/releases/2.7/) to r
 ### Example
 
 ```sh
-$ python Gem5McPATParser.py -c config.json -s stats.txt -t template.xml
+$ python3 Gem5McPATParser.py -c config.json -s stats.txt -t template.xml
 ```
-### Credits
-
-It uses some of the work from a different author:
-
-* [Daya Khudia] - template and some functions has been derived from this repository and updated
-
-License
-----
-
-MIT
 
 
 
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
-
-   
-   [Daya Khudia]: <https://bitbucket.org/dskhudia/gem5tomcpat/>
 
