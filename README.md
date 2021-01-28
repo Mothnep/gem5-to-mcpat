@@ -8,13 +8,25 @@ Last tested on Gem5 version (tag: v20.1.0.2) stable. You can fetch this version 
 
 ```sh
 # assuming you have git installed
-git clone clone https://gem5.googlesource.com/public/gem5
+git clone https://gem5.googlesource.com/public/gem5
 
 # go into cloned gem5 repo
 cd gem5
 
 # checkout supported commit using hash
 git checkout 0d703041fcd5d119012b62287695723a2955b408
+```
+
+### McPat Supported Version
+
+This script was tested with McPat v1.3.0. This can be attained from 
+
+```sh
+git clone https://github.com/HewlettPackard/mcpat
+
+cd mcpat
+
+git checkout tags/v1.3.0
 ```
 
 
