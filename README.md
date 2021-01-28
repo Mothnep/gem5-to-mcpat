@@ -1,6 +1,5 @@
-# Gem5 to McPAT parser with multicore support
-
-This Script converts Gem5 simulation statistics to McPAT compatible input files. It supports multiple cores as well as multiple private or one shared L2 cache
+# Gem5 to McPAT parser 
+This script converts Gem5 simulation statistics to McPAT compatible input files. It supports multiple cores as well as multiple private or one shared L2 cache.
 
 ### Gem5 Supported Version
 
@@ -22,10 +21,13 @@ git checkout 0d703041fcd5d119012b62287695723a2955b408
 This script was tested with McPat v1.3.0. This can be attained from 
 
 ```sh
+# clone mcpat
 git clone https://github.com/HewlettPackard/mcpat
 
+# change directory to mcpat
 cd mcpat
 
+# go to last tested version tag
 git checkout tags/v1.3.0
 ```
 
@@ -59,6 +61,9 @@ Parser requires [python 3.6](https://www.python.org/download/releases/3.6/) to r
 $ python3 Gem5McPATParser.py -c config.json -s stats.txt -t template.xml
 ```
 
+### TODO
+
+- test multicore support
 
 
 
