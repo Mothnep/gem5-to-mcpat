@@ -17,7 +17,7 @@ cd gem5
 git checkout 0d703041fcd5d119012b62287695723a2955b408
 ```
 
-### McPat Supported Version
+### McPat Supported Version:
 
 This script was tested with McPat v1.3.0. This can be attained from 
 
