@@ -1,0 +1,63 @@
+{
+  "configurations": {
+
+    "default": {
+      "system": {
+        "mem_mode": "timing",
+        "clock_domain": {
+          "clock": "2GHz",
+          "voltage_domain": {
+            "voltage": "2.0V"
+          }
+        }
+      },
+      "cpu": {
+        "type": "O3CPU",
+        "num_cores": 1,
+        "branch_prediction": {
+          "enabled": true,
+          "predictor_type": "tournament"
+        }
+      },
+      "memory": {
+        "override_gem5_data": false,
+        "dram": {
+          "type": "DDR3_1600_8x8",
+          "ranks_per_channel": 2,
+          "channels": 2,
+          "size": "2GB"
+        }
+        
+      },
+      "cache_hierarchy": {
+        "l1": {
+          "tag_latency": 2,
+          "data_latency": 2,
+          "response_latency": 2,
+          "mshrs": 4,
+          "tgts_per_mshr": 20
+        },
+        "l1i": {
+          "size": "32kB",
+          "assoc": 2
+        },
+        "l1d": {
+          "size": "32kB",
+          "assoc": 2
+        },
+        "l2": {
+          "size": "1MB",
+          "assoc": 8,
+          "tag_latency": 20,
+          "data_latency": 20,
+          "response_latency": 20,
+          "mshrs": 20,
+          "tgts_per_mshr": 12
+        }
+      },
+      "process": {
+        "binary": "/gem5/tests/test-progs/hello/bin/arm/linux/hello"
+      }
+    }
+  }
+}
